@@ -1,5 +1,7 @@
-export default class Creature extends lifeForm {
-    constructor(type, health = 100, energy = 100, hunger = 100, thirst = 100, speed = 5, x, y) {
+import LifeForm from "./LifeForm";
+export default class Creature extends LifeForm {
+    constructor(type, bodyParts = [], health = 100, energy = 100, hunger = 100, thirst = 100, speed = 5, x =10, y = 10) {
+        super();
         this.type = type;
         this.health = health;
         this.energy = energy;
@@ -9,9 +11,17 @@ export default class Creature extends lifeForm {
         this.speed = speed;
         this.baseDamage = type === "predator" ? 10 : 0;
         this.location = [x, y];
-        this.bodyparts = [];
+        this.prevLocation = [x, y];
+        this.bodyparts = bodyParts;
         this.weight = 0;
         this.readyToReproduce = false;
+        this.targetFood = null;
+        this.isPursuingFood = false;
+        this.instantiateWeight();
+    }
+
+    instantiateWeight () {
+        this.weight += this.bodyparts.reduce((totalWeight, part) => totalWeight + part.weightImpact, 0);
     }
 
     receiveDamage(amount) {
@@ -21,21 +31,26 @@ export default class Creature extends lifeForm {
         }
     }
 
-    moveTowards(targetX, targetY) {
-        let dx = targetX - this.location[0];
-        let dy = targetY - this.location[1];
+    moveTowards(targetLocation) {
+        let dx = targetLocation[0] - this.location[0];
+        let dy = targetLocation[1] - this.location[1];
         let distance = Math.sqrt(dx * dx + dy * dy);
         if (distance > 0) {
             this.location[0] += (dx / distance) * this.speed;
             this.location[1] += (dy / distance) * this.speed;
+            this.hunger -= 1
         }
     }
 
-    eat(energyInc, healthInc) {
-        this.energy += energyInc;
-        this.health += healthInc;
+    moveRandomly () {
+        this.moveTowards([10, 200])
+    }
 
-        // Increase weight if in energy surplus
+    eat(energyInc) {
+        this.energy += energyInc;
+        this.hunger += energyInc;
+        this.health += energyInc;
+
         if (this.energy > 100) {
             this.weight += 0.5;
         }
@@ -53,10 +68,6 @@ export default class Creature extends lifeForm {
         this.hunger -= hungerModifier;
     }
 
-    decreaseEnergy(amount) {
-        this.energy -= amount;
-    }
-
     drink() {
         this.thirst = Math.max(this.thirst - 100, 0);
     }
@@ -72,25 +83,17 @@ export default class Creature extends lifeForm {
             this.energy -= 30;
         }
     }
-
-    getClosest(objs) {
+    getClosest(entities) {
         let closest = null;
         let minDist = Infinity;
-        for (let obj of objs) {
-            let dist = Math.hypot(obj.x - this.location[0], obj.y - this.location[1]);
+    
+        for (let entity of entities) {
+            let dist = Math.hypot(entity.location[0] - this.location[0], entity.location[1] - this.location[1]);
             if (dist < minDist) {
                 minDist = dist;
-                closest = obj;
+                closest = entity;
             }
         }
         return closest;
-    }
-
-    findFood(foodType) {
-        let closestFood = this.getClosest(foodType);
-        if (closestFood) {
-            this.moveTowards(closestFood.x, closestFood.y);
-        }
-    }
-
+    }    
 }

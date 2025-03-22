@@ -1,25 +1,22 @@
 import Creature from "./Creature";
-import Helpers from "./Helpers";
-import Plant from "../Plant";
+import Plant from "../Enviroment/Plant";
 
 export default class Herbivore extends Creature {
 
-    constructor(callback) {
+    constructor(location = []) {
         super();
-        this.onDeathCallback = callback;  // Callback passed from Ecosystem
+        this.location = location;
+        this.calories = 100;
+        this.type = 'herbivore';
+        this.speed = 10;
     }
 
     eat (plant) {
         if (plant instanceof Plant) {
-            const distance = Helpers.calculateDistance(plant, this);
-            // Exit if not close enough
-            if (distance > 0) {
-                return; 
-            }
-            // Eat the plant, decrease hunger and gain energy
             this.hunger -= plant.calories;
             this.energy += plant.calories;
             plant.beEaten();
+            console.log(this.hunger);
         }
     }
 

@@ -1,4 +1,4 @@
-class LifeForm {
+export default class LifeForm {
     constructor (callback) {
         this.onDeathCallback = callback;
     }

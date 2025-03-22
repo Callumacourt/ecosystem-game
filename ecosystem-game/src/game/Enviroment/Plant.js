@@ -1,14 +1,15 @@
-import LifeForm from './Animals/LifeForm';
+import LifeForm from "../Animals/LifeForm";
 
 export default class Plant extends LifeForm {
-    constructor(calories, growthTime, size, x, y, callback) {
+    constructor(calories = 100, growthTime, size, x, y) {
         super();
-        this.onDeathCallBack = callback;
         this.calories = calories;
         this.growthTime = growthTime;
         this.size = size;
+        this.age = 0;
         this.maxSize = 5;  
         this.location = [x, y];
+        this.prevLocation = this.location;
     }
 
     grow() {
@@ -19,6 +20,7 @@ export default class Plant extends LifeForm {
     }
 
     beEaten() {
+        console.log('being eaten')
         if (this.size > 0) {
             this.size -= 1;
             this.calories -= 5;  // Remove one square's worth of food
@@ -26,6 +28,7 @@ export default class Plant extends LifeForm {
 
         if (this.size === 0) {
             this.die();
+            console.log('dead')
         }
     }
 }
