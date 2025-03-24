@@ -13,10 +13,12 @@ export default class Herbivore extends Creature {
 
     eat (plant) {
         if (plant instanceof Plant) {
-            this.hunger -= plant.calories;
+            this.hunger += plant.calories;
             this.energy += plant.calories;
             plant.beEaten();
             console.log(this.hunger);
+        } else {
+            console.log('not a plant')
         }
     }
 

@@ -9,7 +9,7 @@ export default class Creature extends LifeForm {
         this.thirst = thirst;
         this.age = 0;
         this.speed = speed;
-        this.baseDamage = type === "predator" ? 10 : 0;
+        this.baseDamage = type === "predator" ? 50 : 0;
         this.location = [x, y];
         this.prevLocation = [x, y];
         this.bodyparts = bodyParts;
@@ -41,14 +41,34 @@ export default class Creature extends LifeForm {
             this.hunger -= 1
         }
     }
-
-    moveRandomly () {
-        this.moveTowards([10, 200])
+    
+    moveRandomly(gridWidth, gridHeight) {
+        const directions = [
+            { dx: -5, dy: 0 }, // Left
+            { dx: 5, dy: 0 },  // Right
+            { dx: 0, dy: -5 }, // Up
+            { dx: 0, dy: 5 }   // Down
+        ];
+   
+        // Shuffle directions randomly
+        const randomDirection = directions[Math.floor(Math.random() * directions.length)];
+   
+        // Calculate new position
+        const newX = this.location[0] + randomDirection.dx;
+        const newY = this.location[1] + randomDirection.dy;
+   
+        // Ensure movement stays within bounds
+        if (newX >= 0 && newX < gridWidth && newY >= 0 && newY < gridHeight) {
+            this.location = [newX, newY]; // Update location directly
+            this.hunger -= 1;  // Decrease hunger for the movement
+        }
     }
+   
+    
 
-    eat(energyInc) {
-        this.energy += energyInc;
-        this.hunger += energyInc;
+    eat() {
+        console.log('being called')
+        this.hunger += this.targetFood.calories;
         this.health += energyInc;
 
         if (this.energy > 100) {

@@ -12,11 +12,29 @@ const App = () => {
         // Initialize Ecosystem
         const newEcosystem = new Ecosystem();
         
-        // Add some plants and creatures for testing
-        newEcosystem.addPlant(new Plant(100, 10, 3, 100, 100));
-        newEcosystem.addPlant(new Plant(100, 10, 3, 300, 200));
-        newEcosystem.addCreature(new Herbivore([150, 250]));
-        newEcosystem.addCreature(new Predator([400, 300]));
+        // Add random plants
+        for (let i = 0; i < 10; i++) {
+            const randomX = Math.floor(Math.random() * 800);  // Random X position
+            const randomY = Math.floor(Math.random() * 600);  // Random Y position
+            const randomPlant = new Plant(100, 10, 3, randomX, randomY);
+            newEcosystem.addPlant(randomPlant);
+        }
+
+        // Add random herbivores
+        for (let i = 0; i < 5; i++) {
+            const randomX = Math.floor(Math.random() * 800);  // Random X position
+            const randomY = Math.floor(Math.random() * 600);  // Random Y position
+            const randomHerbivore = new Herbivore([randomX, randomY]);
+            newEcosystem.addCreature(randomHerbivore);
+        }
+
+        // Add random predators
+        for (let i = 0; i < 3; i++) {
+            const randomX = Math.floor(Math.random() * 800);  // Random X position
+            const randomY = Math.floor(Math.random() * 600);  // Random Y position
+            const randomPredator = new Predator([randomX, randomY]);
+            newEcosystem.addCreature(randomPredator);
+        }
         
         // Initialize callbacks
         newEcosystem.initialiseCreatures(); 
@@ -26,9 +44,9 @@ const App = () => {
         // Start the simulation update loop
         const interval = setInterval(() => {
             newEcosystem.updateEcosystem();
-            // Force a proper re-render by creating a new ecosystem reference
+
             setEcosystem(ecosystem => {
-                // Create a deep copy or at least a new reference
+            
                 const updatedEcosystem = new Ecosystem();
                 // Copy over the properties
                 updatedEcosystem.plants = [...newEcosystem.plants];

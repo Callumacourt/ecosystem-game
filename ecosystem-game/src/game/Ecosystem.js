@@ -54,21 +54,24 @@ export default class Ecosystem {
 
     // fetches and assigns a target food
     // needs to just correctly get the closest food
-    getFood() {
-        this.creatures.forEach(creature => {
-            if (creature.isPursuingFood) return;  // Skip if already hunting
-            
-            // Search for food in a larger radius
-            let nearby = this.grid.getNearbyEntities(creature.location[0], creature.location[1], 200);
-            
-            console.log(`${creature.type} at [${creature.location}] found ${nearby.length} nearby entities`);
+    getFood(creature) {{
+
+            if (creature.isPursuingFood) {
+                return    
+            }
+
+            // Search for food
+            let nearby = this.grid.getNearbyEntities(creature.location[0], creature.location[1], 500);
+        
+
+            if (nearby.length === 0) {
+                creature.moveRandomly();
+            }
             
             let foodSource = creature.type === "herbivore" 
                 ? nearby.filter(e => e instanceof Plant) 
                 : nearby.filter(e => e.type === "herbivore");
-            
-            console.log(`${creature.type} found ${foodSource.length} potential food sources`);
-            
+        
             let closestFood = creature.getClosest(foodSource);
             
             if (closestFood) {
@@ -76,50 +79,47 @@ export default class Ecosystem {
                 creature.targetFood = closestFood;
                 console.log(`${creature.type} is now targeting food at ${closestFood.location}`);
             }
-        });
+        };
     }
 
     updateEcosystem() {
         this.creatures.forEach(creature => {
             this.passTime(creature);
+            creature.moveRandomly(this.grid.width, this.grid.height);
+    
             if (creature.hunger < 0) {
                 creature.die();
-                this.grid.removeFromGrid(creature)
+                this.grid.removeFromGrid(creature);
+                return;
             }
-            if (creature.hunger < 40 && creature.targetFood) {
-                // Move towards the target food
-                console.log('calling')
+    
+            if (creature.hunger < 80 && creature.targetFood) {
                 creature.moveTowards(creature.targetFood.location);
-                
-                // if the location is in range, then attack or eat it
+    
                 if (Helpers.calculateDistance(creature, creature.targetFood) < 5) {
-                    console.log("Creature in range to eat/attack");
                     if (creature instanceof Predator) {
                         creature.attack(creature.targetFood);
-                    }
-                    else {
-                        creature.eat(creature.targetFood.calories);
+                    } else {
+                        creature.eat();
+                        creature.hunger += 200;
                         creature.targetFood.beEaten();
                         creature.targetFood = null;
                         creature.isPursuingFood = false;
                     }
                 }
-            } else if (creature.hunger < 40) {
-                this.getFood();
-
-                if(this.getFood == undefined) {
-                    moveRandomly();
+            } else if (creature.hunger <80) {
+                this.getFood(creature);
+    
+                if (!creature.targetFood) {
+                    creature.moveRandomly(10, 10);
                 }
             }
-            else {
-                creature.moveRandomly();
-            }
         });
-        
+    
         this.plants.forEach(plant => {
             this.passTime(plant);
         });
-        
+    
         this.grid.updateGrid(this.creatures.concat(this.plants));
     }
     }

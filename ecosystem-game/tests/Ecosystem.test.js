@@ -125,9 +125,6 @@ test("updateEcosystem causes hungry creatures to seek food", () => {
     // Make creature hungry
     herbivore.hunger = 50;
     
-    // Mock the creature methods
-    herbivore.moveTowards = vi.fn();
-    
     // Run the ecosystem update
     ecosystem.updateEcosystem();
     

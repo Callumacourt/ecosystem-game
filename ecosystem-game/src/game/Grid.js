@@ -1,7 +1,9 @@
 export default class Grid {
-    constructor(cellSize = 50) {
+    constructor(cellSize = 50, gridWidth = 1000, gridHeight = 1000) {
         this.gridMap = new Map();  // Map to hold grid cells
         this.cellSize = cellSize;  // Size of each grid cell
+        this.width = gridWidth;    // Number of cells horizontally
+        this.height = gridHeight;  // Number of cells vertically
     }
     // Get the grid key for a given position (x, y)
     getGridKey(x, y) {
@@ -11,7 +13,6 @@ export default class Grid {
     // Add an entity to the grid at its current location
     addToGrid(entity) {
         let key = this.getGridKey(entity.location[0], entity.location[1]);
-        console.log('key for' + entity + ': ' + key);
         if (!this.gridMap.has(key)) {
             this.gridMap.set(key, []);
         }
@@ -43,8 +44,7 @@ export default class Grid {
         let [currentGridX, currentGridY] = currentKey.split(",").map(Number);
         
         // Determine how many grid cells to check around the current position
-        // Based on your grid cell size (which isn't shown in your code)
-        const gridCellSize = 50; // Assuming each grid cell is 50x50 units
+        const gridCellSize = 50; 
         const gridSearchRadius = Math.ceil(searchRadius / gridCellSize);
         
         // Check nearby grid cells in a radius
