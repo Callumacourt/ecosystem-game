@@ -13,7 +13,7 @@ const App = () => {
         const newEcosystem = new Ecosystem();
         
         // Add random plants
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < 50; i++) {
             const randomX = Math.floor(Math.random() * 800);  // Random X position
             const randomY = Math.floor(Math.random() * 600);  // Random Y position
             const randomPlant = new Plant(100, 10, 3, randomX, randomY);
@@ -21,7 +21,7 @@ const App = () => {
         }
 
         // Add random herbivores
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 8; i++) {
             const randomX = Math.floor(Math.random() * 800);  // Random X position
             const randomY = Math.floor(Math.random() * 600);  // Random Y position
             const randomHerbivore = new Herbivore([randomX, randomY]);

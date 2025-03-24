@@ -1,6 +1,6 @@
 import LifeForm from "./LifeForm";
 export default class Creature extends LifeForm {
-    constructor(type, bodyParts = [], health = 100, energy = 100, hunger = 100, thirst = 100, speed = 5, x =10, y = 10) {
+    constructor(type, health = 100, energy = 100, hunger = 100, thirst = 100, speed = 5, x =10, y = 10) {
         super();
         this.type = type;
         this.health = health;
@@ -12,16 +12,26 @@ export default class Creature extends LifeForm {
         this.baseDamage = type === "predator" ? 50 : 0;
         this.location = [x, y];
         this.prevLocation = [x, y];
-        this.bodyparts = bodyParts;
-        this.weight = 0;
         this.readyToReproduce = false;
         this.targetFood = null;
         this.isPursuingFood = false;
-        this.instantiateWeight();
     }
 
-    instantiateWeight () {
-        this.weight += this.bodyparts.reduce((totalWeight, part) => totalWeight + part.weightImpact, 0);
+    update () {
+        this.decreaseHunger();
+        this.decreaseThirst();
+    }
+
+    decreaseHunger () {
+        this.hunger -= 0.2;
+        if (this.hunger < 0) {
+            this.receiveDamage(2)
+        }
+    }
+
+    decreaseThirst () {
+        this.thirst -= 1;
+        // if (this.thirst <= 0) this.health -= 5; // Damage if dehydrated
     }
 
     receiveDamage(amount) {
@@ -63,38 +73,15 @@ export default class Creature extends LifeForm {
             this.hunger -= 1;  // Decrease hunger for the movement
         }
     }
-   
-    
 
-    eat() {
-        console.log('being called')
+    eat (targetFood) {
+        targetFood.beEaten();
         this.hunger += this.targetFood.calories;
-        this.health += energyInc;
-
-        if (this.energy > 100) {
-            this.weight += 0.5;
-        }
-    }
-
-    getHungry() {
-        // Hunger decreases faster if more limbs and more weight
-        const baseHungerRate = 1;
-        const limbPenalty = 0.2;
-        const weightPenalty = 0.1;
-
-        const bodyCost = this.bodyparts.length;
-        const hungerModifier = baseHungerRate + (bodyCost * limbPenalty) + (this.weight * weightPenalty);
-
-        this.hunger -= hungerModifier;
+        this.health += this.targetFood.calories;
     }
 
     drink() {
         this.thirst = Math.max(this.thirst - 100, 0);
-    }
-
-    getThirsty() {
-        this.thirst -= 1;
-        if (this.thirst <= 0) this.health -= 5; // Damage if dehydrated
     }
 
     reproduce() {
@@ -103,6 +90,7 @@ export default class Creature extends LifeForm {
             this.energy -= 30;
         }
     }
+
     getClosest(entities) {
         let closest = null;
         let minDist = Infinity;

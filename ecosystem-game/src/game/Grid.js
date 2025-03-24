@@ -20,20 +20,12 @@ export default class Grid {
     }
 
     removeFromGrid(entity) {
-        console.log("Removing entity from grid:", entity);
         const key = this.getGridKey(entity.location[0], entity.location[1]);
-        console.log("Grid key:", key);
+
         const cell = this.gridMap.get(key);
-        console.log("Cell before removal:", cell);
         if (cell) {
             this.gridMap.set(key, cell.filter(e => e !== entity));
-            console.log("Cell after removal:", this.gridMap.get(key));
-        } else {
-            console.log("No cell found at key");
         }
-        
-        console.log('current keys')
-        console.log(this.gridMap.keys());
     }
 
     // Get nearby entities from the grid (including diagonal neighbors)

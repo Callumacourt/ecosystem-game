@@ -1,6 +1,7 @@
 import Creature from "./Animals/Creature";
 import Helpers from "./Animals/Helpers";
 import Predator from "./Animals/Predator";
+import Herbivore from "./Animals/Herbivore";
 import Plant from "./Enviroment/Plant";
 import Grid from "./Grid";
 
@@ -44,7 +45,7 @@ export default class Ecosystem {
     passTime (entity) {
         if (entity instanceof Creature) {
             entity.age += 0.2;
-            entity.hunger -= 0.2
+            entity.decreaseHunger();
             entity.getThirsty();
         }
         else {
@@ -53,65 +54,77 @@ export default class Ecosystem {
     }
 
     // fetches and assigns a target food
-    // needs to just correctly get the closest food
-    getFood(creature) {{
-
-            if (creature.isPursuingFood) {
-                return    
-            }
-
-            // Search for food
-            let nearby = this.grid.getNearbyEntities(creature.location[0], creature.location[1], 500);
+    getFood(creature) {
+        // If already pursuing food, do nothing
+        if (creature.isPursuingFood) {
+            return null;
+        }
+    
+        // Search for food
+        let nearby = this.grid.getNearbyEntities(creature.location[0], creature.location[1], 500);
+    
+        if (nearby.length === 0) {
+            creature.moveRandomly();
+            return null;
+        }
         
-
-            if (nearby.length === 0) {
-                creature.moveRandomly();
-            }
-            
-            let foodSource = creature.type === "herbivore" 
-                ? nearby.filter(e => e instanceof Plant) 
-                : nearby.filter(e => e.type === "herbivore");
+        // Filter food based on creature type
+        let foodSource = creature.type === "herbivore" 
+            ? nearby.filter(e => e instanceof Plant) 
+            : nearby.filter(e => e.type === "herbivore");
+    
+        let closestFood = creature.getClosest(foodSource);
         
-            let closestFood = creature.getClosest(foodSource);
-            
-            if (closestFood) {
-                creature.isPursuingFood = true;
-                creature.targetFood = closestFood;
-                console.log(`${creature.type} is now targeting food at ${closestFood.location}`);
-            }
-        };
+        if (closestFood) {
+            creature.isPursuingFood = true;
+            creature.targetFood = closestFood;
+            console.log(`${creature.type} is now targeting food at ${closestFood.location}`);
+            return closestFood;
+        }
+    
+        return null;
     }
-
+    
     updateEcosystem() {
         this.creatures.forEach(creature => {
-            this.passTime(creature);
+            if (creature instanceof Herbivore) {
+                let predatorsNearby = this.creatures.filter(c => c instanceof Predator && Helpers.calculateDistance(creature, c) < 50);
+                if (predatorsNearby.length > 0) {
+                    creature.flee(predatorsNearby[0]);  // Flee from the closest predator
+                } else {
+             
+                    creature.update();
+                }
+
+            }
             creature.moveRandomly(this.grid.width, this.grid.height);
-    
-            if (creature.hunger < 0) {
-                creature.die();
+
+            if (creature.health < 0) {
                 this.grid.removeFromGrid(creature);
                 return;
             }
     
-            if (creature.hunger < 80 && creature.targetFood) {
-                creature.moveTowards(creature.targetFood.location);
-    
-                if (Helpers.calculateDistance(creature, creature.targetFood) < 5) {
-                    if (creature instanceof Predator) {
-                        creature.attack(creature.targetFood);
-                    } else {
-                        creature.eat();
-                        creature.hunger += 200;
-                        creature.targetFood.beEaten();
-                        creature.targetFood = null;
-                        creature.isPursuingFood = false;
-                    }
-                }
-            } else if (creature.hunger <80) {
-                this.getFood(creature);
-    
+            // Manage hunger and food pursuit
+            if (creature.hunger < 70) {
+                // Try to get food if not currently pursuing
                 if (!creature.targetFood) {
-                    creature.moveRandomly(10, 10);
+                    this.getFood(creature);
+                }
+    
+                // If have a target food, move towards it
+                if (creature.targetFood) {
+                    creature.moveTowards(creature.targetFood.location);
+    
+                    // Check if close enough to eat
+                    if (Helpers.calculateDistance(creature, creature.targetFood) < 3) {
+                        if (creature instanceof Predator) {
+                            creature.attack(creature.targetFood);
+                        } else {
+                            creature.eat(creature.targetFood)
+                            creature.targetFood = null;
+                            creature.isPursuingFood = false;
+                        }
+                    }
                 }
             }
         });
@@ -122,4 +135,4 @@ export default class Ecosystem {
     
         this.grid.updateGrid(this.creatures.concat(this.plants));
     }
-    }
+}
