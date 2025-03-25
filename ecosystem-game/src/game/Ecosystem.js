@@ -10,6 +10,7 @@ export default class Ecosystem {
         this.plants = [];
         this.creatures = [];
         this.grid = new Grid();  
+        this.time = 0;
     }
 
     addPlant(plant) {
@@ -46,7 +47,7 @@ export default class Ecosystem {
         if (entity instanceof Creature) {
             entity.age += 0.2;
             entity.decreaseHunger();
-            entity.getThirsty();
+            entity.decreaseThirst();
         }
         else {
             entity.age += 0.1;
@@ -86,36 +87,41 @@ export default class Ecosystem {
     }
     
     updateEcosystem() {
+        this.time += 0.2;
         this.creatures.forEach(creature => {
+            this.passTime(creature)
+            if (creature.health > 80 && creature.hunger > 50) {
+                creature.readyToReproduce = true;
+                creature.reproduce(this);
+            } else {
+                creature.readyToReproduce = false;
+            }
             if (creature instanceof Herbivore) {
                 let predatorsNearby = this.creatures.filter(c => c instanceof Predator && Helpers.calculateDistance(creature, c) < 50);
                 if (predatorsNearby.length > 0) {
                     creature.flee(predatorsNearby[0]);  // Flee from the closest predator
+                    creature.isPursuingFood = false;
                 } else {
-             
                     creature.update();
                 }
-
             }
+    
             creature.moveRandomly(this.grid.width, this.grid.height);
-
+    
             if (creature.health < 0) {
                 this.grid.removeFromGrid(creature);
                 return;
             }
     
-            // Manage hunger and food pursuit
+            // Existing food pursuit logic...
             if (creature.hunger < 70) {
-                // Try to get food if not currently pursuing
                 if (!creature.targetFood) {
                     this.getFood(creature);
                 }
     
-                // If have a target food, move towards it
                 if (creature.targetFood) {
                     creature.moveTowards(creature.targetFood.location);
     
-                    // Check if close enough to eat
                     if (Helpers.calculateDistance(creature, creature.targetFood) < 3) {
                         if (creature instanceof Predator) {
                             creature.attack(creature.targetFood);

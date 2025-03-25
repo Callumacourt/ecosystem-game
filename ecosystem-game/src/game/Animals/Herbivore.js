@@ -7,7 +7,7 @@ export default class Herbivore extends Creature {
     constructor(location = []) {
         super();
         this.location = location;
-        this.calories = 100;
+        this.calories = 200;
         this.type = 'herbivore';
         this.speed = 10;
     }
@@ -29,8 +29,6 @@ export default class Herbivore extends Creature {
             this.location[1] += (newDy / distance) * fleeSpeed;
             this.hunger -= 2;
             this.energy -= 5;
-    
-            console.log(`Herbivore fleeing with speed ${fleeSpeed.toFixed(2)}`);
         }
     }
     
